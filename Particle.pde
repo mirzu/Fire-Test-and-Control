@@ -20,7 +20,7 @@ class Particle {
   // Another constructor (the one we are using here)
   Particle(PVector l,PImage img_) {
     acc = new PVector(0.0,0.0,0.0);
-    float x = (float) generator.nextGaussian()*0.3f;
+    float x = (float) generator.nextGaussian()*0.4f;
     float y = (float) generator.nextGaussian()*0.3f - 1.0f;
     vel = new PVector(x,y,0);
     loc = l.get();
@@ -63,7 +63,3 @@ class Particle {
     }
   }
 }
-
-
-
-

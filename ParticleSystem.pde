@@ -3,10 +3,10 @@
 
 class ParticleSystem {
 
-  ArrayList particles;    // An arraylist for all the particles
-  PVector origin;        // An origin point for where particles are birthed
-  PVector direction;  // A default direction for the particles.
-  PVector defaultDirection;
+  ArrayList particles;      // An arraylist for all the particles
+  PVector origin;           // An origin point for where particles are birthed
+  PVector direction;        // A default direction for the particles.
+  PVector defaultDirection; 
   PImage img;
  
   
@@ -51,6 +51,7 @@ class ParticleSystem {
     for (int i = particles.size()-1; i >= 0; i--) {
       Particle p = (Particle) particles.get(i);
       p.add_force(direction);
+      
     }  
   }
   

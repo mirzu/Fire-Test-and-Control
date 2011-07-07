@@ -6,14 +6,14 @@
  * Each particle is rendered as an alpha masked image. 
  */
 
-ParticleSystem ps;
-ParticleSystem pd;
 ParticleCollection emitters;
 ArrayList locations;
+ArrayList directions;
 
 Random generator;
 float defaultWind = 0.021;
-float force = 0;
+float forcex = 0;
+float forcey = 0;
 
 void setup() {
 
@@ -22,18 +22,36 @@ void setup() {
 
   // Using a Java random number generator for Gaussian random numbers
   generator = new Random();
-
+   
   // Create an alpha masked image to be applied as the particle's texture
   PImage msk = loadImage("texture.gif");
   PImage img = new PImage(msk.width,msk.height);
-  for (int i = 0; i < img.pixels.length; i++) img.pixels[i] = color(255);
+  for (int i = 0; i < img.pixels.length; i++) img.pixels[i] = color(255, 218, 3);
   img.mask(msk);
   
+   // set up the origins. 
   locations = new ArrayList();
-  locations.add(new PVector(width/2,height/2));
-  locations.add(new PVector(width/3,height/3));
+ 
+  int locx = width/4; 
+  int locy = height/4;
   
-  emitters = new ParticleCollection(locations, img);
+  locations.add(new PVector( locx, locy ));
+  locations.add(new PVector( locx * 3, locy ));
+  locations.add(new PVector( locx, locy * 3 ));
+  locations.add(new PVector( locx * 3, locy * 3 ));
+   
+  // set up the fire directions
+  directions = new ArrayList();
+  directions.add(new PVector(-0.5, -0.5));
+  directions.add(new PVector(0.5, -0.5));
+  directions.add(new PVector(-0.5, 0.5));
+  directions.add(new PVector(0.5, 0.5));
+    
+  emitters = new ParticleCollection(locations, directions, img);
+  
+  for(int i = 0; i < directions.size(); i++){
+    emitters.addDir(i, (PVector) directions.get(i));
+  }  
   
   smooth();
 }
@@ -46,32 +64,20 @@ void draw() {
   float dy = (mouseY - height/2) / 1000.0;
   PVector mouseLoc = new PVector(mouseX, mouseY);
   
-  if(keyPressed == true){
-    int emitter = 0;
-    if (key == '1'){
-      emitter = 0; 
-    }
-    if (key == '2'){
-      emitter = 1;
-    } 
-    emitters.fire(emitter);
-  } /* 
+  /*
   if (mousePressed) {
-    force = dx;
+    forcex = dx;
+    forcey = dy;
+    println(dx + "," + dy);
   } else { 
-    force = defaultWind;
+    forcex = defaultWind;
+    forcey = 0;
   }
   */
-  PVector wind = new PVector(0,force,0);
+  PVector wind = new PVector(forcex,forcey,0);
  
   emitters.add_force(wind);
   emitters.run();
 
 }
-
-
-
-
-
-
 
