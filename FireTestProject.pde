@@ -1,10 +1,19 @@
 /**
- * Smoke Particle System
+ * Fire Test Bed.
+ * by Michal Minecki
+ *
+ * with Particle Code
  * by Daniel Shiffman.  
  * 
- * A basic smoke effect using a particle system. 
- * Each particle is rendered as an alpha masked image. 
+ * A Basic Particle System that also activates serial output to
+ * an arduino. 
+ *
  */
+// Serial setup
+import processing.serial.*;
+
+Serial myPort;  // Create object from Serial class
+int val;        // Data received from the serial port
 
 ParticleCollection emitters;
 ArrayList locations;
@@ -16,7 +25,11 @@ float forcex = 0;
 float forcey = 0;
 
 void setup() {
-
+  // Serial Setup
+  String portName = Serial.list()[0];
+  myPort = new Serial(this, portName, 9600);
+  
+  // window setup. 
   size(640, 480);
   colorMode(RGB, 255, 255, 255, 100);
 

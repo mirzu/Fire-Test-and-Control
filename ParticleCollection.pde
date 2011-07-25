@@ -27,7 +27,8 @@ class ParticleCollection {
     if(keyPressed == true){
       int emitter = 0;
       if (key == '1'){
-        keys[0] = 1; 
+        keys[0] = 1;
+        myPort.write('H');
       }
       if (key == '2'){
         keys[1] = 1;
@@ -46,7 +47,8 @@ class ParticleCollection {
     } else {
      for (int i = 0; i < keys.length; i++) { 
        keys[i] = 0;
-      }
+     }
+     myPort.write('L');
     }
     
     
