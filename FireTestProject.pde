@@ -28,6 +28,7 @@ void setup() {
   // Serial Setup
   String portName = Serial.list()[0];
   myPort = new Serial(this, portName, 9600);
+  println(Serial.list()); // list available serial ports
   
   // window setup. 
   size(640, 480);

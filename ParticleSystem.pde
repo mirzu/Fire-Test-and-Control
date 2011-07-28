@@ -51,7 +51,6 @@ class ParticleSystem {
     for (int i = particles.size()-1; i >= 0; i--) {
       Particle p = (Particle) particles.get(i);
       p.add_force(direction);
-      
     }  
   }
   

@@ -24,11 +24,11 @@ class ParticleCollection {
   
   void run() {
     
+    // deal with key press for each of the individual fire keys.
     if(keyPressed == true){
       int emitter = 0;
       if (key == '1'){
         keys[0] = 1;
-        myPort.write('H');
       }
       if (key == '2'){
         keys[1] = 1;
@@ -39,6 +39,8 @@ class ParticleCollection {
       if (key == '4'){
         keys[3] = 1;
       }
+      
+      // fire the emmiter indexed at the key
       for (int i = 0; i < keys.length; i++) { 
         if (keys[i] == 1) {
          fire(i);
@@ -48,7 +50,7 @@ class ParticleCollection {
      for (int i = 0; i < keys.length; i++) { 
        keys[i] = 0;
      }
-     myPort.write('L');
+     myPort.write('0');
     }
     
     
@@ -56,8 +58,6 @@ class ParticleCollection {
       // get our players.
       ParticleSystem e = (ParticleSystem) emitters.get(i);
       ImageButtons b = (ImageButtons) buttons.get(i);
-      
-      // track keys
       
       
       // runtime for the emitter and button. 
@@ -93,6 +93,18 @@ class ParticleCollection {
   void fire(int emitter) {
    ParticleSystem p = (ParticleSystem) emitters.get(emitter);
    p.fire();
+   if (emitter == 0) {
+     myPort.write('Q');
+   }
+   if (emitter == 1) {
+     myPort.write('W');
+   }
+   if (emitter == 2) {
+     myPort.write('E');
+   }
+   if (emitter == 3) {
+     myPort.write('R');
+   }
   } 
   
 }  
