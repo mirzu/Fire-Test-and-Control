@@ -9,6 +9,13 @@
  * an arduino. 
  *
  */
+ 
+// osc setup
+import oscP5.*;
+import netP5.*;
+
+OscP5 oscP5;
+
 // Serial setup
 import processing.serial.*;
 
@@ -24,7 +31,14 @@ float defaultWind = 0.021;
 float forcex = 0;
 float forcey = 0;
 
+// it's late 
+int quickTest = 0;
+
 void setup() {
+  
+  // osc listener
+  oscP5 = new OscP5(this, "127.0.0.1", 12345);
+  
   // Serial Setup
   String portName = Serial.list()[0];
   myPort = new Serial(this, portName, 9600);
@@ -70,6 +84,16 @@ void setup() {
   smooth();
 }
 
+void oscEvent(OscMessage msg) {
+  msg.print();
+  
+  if (msg.checkAddrPattern("/righthand")) {
+    println("win");
+    quickTest = 1; 
+  }
+  
+}
+
 void draw() {
   background(75);
 
@@ -77,6 +101,10 @@ void draw() {
   float dx = (mouseX - width/2) / 1000.0;
   float dy = (mouseY - height/2) / 1000.0;
   PVector mouseLoc = new PVector(mouseX, mouseY);
+  
+  if (quickTest > 0) {
+    emitters.fire(3);
+  } 
   
   /*
   if (mousePressed) {
