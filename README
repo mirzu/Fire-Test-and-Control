@@ -1,0 +1,1 @@
+A fire simulation and control sketch that takes input from a Kinect, using the amazing synapse kinect app or keyboard and sends out serial messages to an arduino.
