@@ -34,10 +34,15 @@ float forcey = 0;
 // it's late 
 int quickTest = 0;
 
+// synapse address
+NetAddress myRemoteLocation;
+
 void setup() {
   
   // osc listener
-  oscP5 = new OscP5(this, "127.0.0.1", 12345);
+  oscP5 = new OscP5(this, 12345);
+  
+  myRemoteLocation = new NetAddress("127.0.0.1",12346);
   
   // Serial Setup
   String portName = Serial.list()[0];
@@ -82,20 +87,16 @@ void setup() {
   }  
   
   smooth();
-}
-
-void oscEvent(OscMessage msg) {
-  msg.print();
   
-  if (msg.checkAddrPattern("/righthand")) {
-    println("win");
-    quickTest = 1; 
-  }
-  
+  oscP5.plug(this,"lefthand","/lefthand_pos_body");
+  oscP5.plug(this,"righthand","/righthand_pos_body");
+  translate(width/2, height/2);
 }
 
 void draw() {
   background(75);
+  fill(255);
+  ellipse(width/2, height/2, 30, 30);
 
   // Calculate a "wind" force based on mouse horizontal position
   float dx = (mouseX - width/2) / 1000.0;
@@ -121,5 +122,37 @@ void draw() {
   emitters.add_force(wind);
   emitters.run();
 
+}
+
+public void lefthand(float lhx, float lhy, float lhz) {
+  println("### plug event method. received a message /lefthand_pos_body.");
+  println("x:" + lhx + " y:" + lhy + " z:" + lhz);
+}
+
+public void righthand(float rhx, float rhy, float rhz) {
+  println("### plug event method. received a message /lefthand_pos_body.");
+  println("x:" + rhx + " y:" + rhy + " z:" + rhz);
+}
+
+void oscEvent(OscMessage msg) {
+  
+  if (msg.checkAddrPattern("/lefthand_pos_body")) {
+   println("getting position");
+  }
+  
+    OscMessage  triggerLeft = new OscMessage("/lefthand_trackjointpos");
+    triggerLeft.add(1);
+    oscP5.send(triggerLeft, myRemoteLocation);
+    
+    OscMessage triggerRight  = new OscMessage("/righthand_trackjointpos");
+    triggerRight.add(1);
+    oscP5.send(triggerRight, myRemoteLocation);
+    
+    println("win");
+    //quickTest = 1; 
+   
+  
+   msg.print();
+  
 }
 
