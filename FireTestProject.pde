@@ -39,6 +39,9 @@ float defaultWind = 0.021;
 float forcex = 0;
 float forcey = 0;
 
+//need to have a font
+PFont font;
+
 void setup() {
   
   // osc listener
@@ -97,8 +100,11 @@ void setup() {
   oscP5.plug(this,"lefthand","/lefthand_pos_body");
   oscP5.plug(this,"righthand","/righthand_pos_body");
   
-  leftHand = new hand(new PVector(0,0));
-  rightHand = new hand(new PVector(0,0));
+  leftHand = new hand(new PVector(0,0), "left");
+  rightHand = new hand(new PVector(0,0), "right");
+  
+   //font = loadFont("AndaleMono-14.v1w");
+   //textFont(font); 
 }
 
 void draw() {
@@ -121,12 +127,6 @@ void draw() {
 
 }
 
-public void lefthand(float x, float y, float z) {
-  //println("### plug event method. received a message /lefthand_pos_body.");
-  //println("x:" + lhx + " y:" + lhy + " z:" + lhz);
-  leftHand.move(new PVector(x, y)); 
-}
-
 int lhx;
 int lhy;
 int rhx;
@@ -136,10 +136,18 @@ int maxLhy;
 int maxRhx;
 int maxRhy;
 
+public void lefthand(float x, float y, float z) {
+  //println("### plug event method. received a message /lefthand_pos_body.");
+  //println("x:" + lhx + " y:" + lhy + " z:" + lhz);
+  leftHand.move(new PVector(x, -y)); 
+}
+
+
+
 public void righthand(float x, float y, float z) {
   //println("### plug event method. received a message /righthand_pos_body.");
   //println("x:" + x + " y:" + y + " z:" + z);
-  rightHand.move(new PVector(x, y)); 
+  rightHand.move(new PVector(x, -y)); 
 }
 
 void oscEvent(OscMessage msg) {
@@ -162,22 +170,72 @@ public void refreshSynapse() {
   oscP5.send(triggerRight, synapse);
 }
 
-class hand {
+class joint {
   PVector position;
   int diameter = 25;
+  String side;
   
-  hand (PVector setPosition) {
-   position = setPosition;  
+  joint (PVector setPosition, String setSide) {
+   side = setSide;
+   position = setPosition; 
   }
   
   void move(PVector moveTo) {
     position = moveTo;
+    position.div(10);
   }
   
   void display() {
     pushMatrix();
     translate(width/2, height/2);
     ellipse(position.x, position.y, diameter, diameter);
+    text( "x:"+position.x+" y:"+position.y + " side: "+side, position.x, position.y );
     popMatrix();
+  }
+}
+
+class hand extends joint {
+  float maxX= 0;
+  float maxY = 0;
+  float minX = 0;
+  float minY = 0;
+  float range = 10; 
+  
+  hand (PVector setPosition, String setSide) {
+   super(setPosition, setSide);
+  }
+  
+
+  
+  void display() {
+    if(position.x > maxX) {
+      maxX = position.x;
+    }
+    if(position.y > maxY) {
+      maxY = position.y;
+    }
+    if(position.x < minX) {
+      minX = position.x;
+    }
+    if(position.y > minY) {
+      minY = position.y;
+    }
+    
+    if (side == "right"){
+      if (position.x >= maxX-range && position.x <= maxX+range){
+        emitters.fire(2);
+      }  
+    }
+    
+    if (side == "left"){
+      if (position.x >= minX-range && position.x <= minX+range){
+        emitters.fire(1);
+      }  
+    }
+   
+    super.display();
+    pushMatrix();
+    translate(width/2, height/2);
+    popMatrix();  
   }
 }
