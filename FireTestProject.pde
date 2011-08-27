@@ -31,6 +31,8 @@ ParticleCollection emitters;
 ArrayList locations;
 ArrayList directions;
 
+joint torso;
+joint head;
 hand leftHand;
 hand rightHand;
 
@@ -99,7 +101,11 @@ void setup() {
   
   oscP5.plug(this,"lefthand","/lefthand_pos_body");
   oscP5.plug(this,"righthand","/righthand_pos_body");
+  oscP5.plug(this,"torso", "/torso_pos_body");
+  oscP5.plug(this,"head", "/head_pos_body");
   
+  head = new joint(new PVector(0,0), "head");
+  torso = new joint(new PVector(0,0), "torso");
   leftHand = new hand(new PVector(0,0), "left");
   rightHand = new hand(new PVector(0,0), "right");
   
@@ -114,6 +120,8 @@ void draw() {
   
   rightHand.display();
   leftHand.display();
+  torso.display();
+  head.display();
   //println( "mouse x: " + mouseX + ", mouse y:" + mouseY); 
   // Calculate a "wind" force based on mouse horizontal position
   float dx = (mouseX - width/2) / 1000.0;
@@ -136,13 +144,24 @@ int maxLhy;
 int maxRhx;
 int maxRhy;
 
+
+public void torso(float x, float y, float z) {
+  //println("### plug event method. received a message /lefthand_pos_body.");
+  //println("x:" + x + " y:" + y + " z:" + z);
+  torso.move(new PVector(x, -y)); 
+}
+
+public void head(float x, float y, float z) {
+  //println("### plug event method. received a message /lefthand_pos_body.");
+  //println("x:" + x + " y:" + y + " z:" + z);
+  head.move(new PVector(x, -y)); 
+}
+
 public void lefthand(float x, float y, float z) {
   //println("### plug event method. received a message /lefthand_pos_body.");
   //println("x:" + lhx + " y:" + lhy + " z:" + lhz);
   leftHand.move(new PVector(x, -y)); 
 }
-
-
 
 public void righthand(float x, float y, float z) {
   //println("### plug event method. received a message /righthand_pos_body.");
@@ -161,6 +180,14 @@ void oscEvent(OscMessage msg) {
 }
 
 public void refreshSynapse() {
+  OscMessage  triggerHead = new OscMessage("/head_trackjointpos");
+  triggerHead.add(1);
+  oscP5.send(triggerHead, synapse);
+  
+  OscMessage  triggerTorso = new OscMessage("/torso_trackjointpos");
+  triggerTorso.add(1);
+  oscP5.send(triggerTorso, synapse);
+  
   OscMessage  triggerLeft = new OscMessage("/lefthand_trackjointpos");
   triggerLeft.add(1);
   oscP5.send(triggerLeft, synapse);
@@ -172,8 +199,11 @@ public void refreshSynapse() {
 
 class joint {
   PVector position;
+  float range = 10;
   int diameter = 25;
   String side;
+  PVector torsoPos = new PVector(0,0,0);
+  PVector centerLine = new PVector(0,10,0);
   
   joint (PVector setPosition, String setSide) {
    side = setSide;
@@ -182,32 +212,43 @@ class joint {
   
   void move(PVector moveTo) {
     position = moveTo;
-    position.div(10);
+    position.div(range);
+  }
+  
+  PVector position() {
+    return position;
+  }
+  
+  void getTorso(PVector getTorso) {
+    torsoPos = getTorso; 
   }
   
   void display() {
+    float a = PVector.angleBetween(centerLine, position);
+    //println(degrees(a));
+    
     pushMatrix();
     translate(width/2, height/2);
     ellipse(position.x, position.y, diameter, diameter);
-    text( "x:"+position.x+" y:"+position.y + " side: "+side, position.x, position.y );
+    
     popMatrix();
   }
 }
 
 class hand extends joint {
-  float maxX= 0;
-  float maxY = 0;
-  float minX = 0;
-  float minY = 0;
-  float range = 10; 
-  
+  float maxX= 1;
+  float maxY = 1;
+  float minX = 1;
+  float minY = 1;
+  PVector distance = new PVector(0,0,0);
+
   hand (PVector setPosition, String setSide) {
    super(setPosition, setSide);
   }
   
-
-  
   void display() {
+    //println(position.mag());
+    
     if(position.x > maxX) {
       maxX = position.x;
     }
@@ -217,23 +258,35 @@ class hand extends joint {
     if(position.x < minX) {
       minX = position.x;
     }
-    if(position.y > minY) {
+    if(position.y < minY) {
       minY = position.y;
     }
     
     if (side == "right"){
       if (position.x >= maxX-range && position.x <= maxX+range){
         emitters.fire(2);
+      }
+      if (position.y >= minY-range && position.y <= minY+range){
+        emitters.fire(3);
       }  
     }
     
     if (side == "left"){
+      println(minY);
       if (position.x >= minX-range && position.x <= minX+range){
         emitters.fire(1);
-      }  
+      }
+      if (position.y >= minY-range && position.y <= minY+range){
+        emitters.fire(0);
+      } 
+  
     }
    
     super.display();
+    float a = position.mag();
+    if (side == "left") {
+      text( "x:" + position.x + " y:"+ position.y +  "mag: " + a + " side: " + side, 5, 10  );
+    }     
     pushMatrix();
     translate(width/2, height/2);
     popMatrix();  
