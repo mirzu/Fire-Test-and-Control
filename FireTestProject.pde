@@ -106,8 +106,8 @@ void setup() {
   oscP5.plug(this,"torso", "/torso_pos_body");
   oscP5.plug(this,"head", "/head_pos_body");
   
-  for(int i = 0; i < 5; i++){
-    println("Duck");
+  for(int i = 1; i < 5; i++){
+ 
     String path = "/osc/button" + Integer.toString(i);
     println(path);
     iphone.plug(this,"iphoneButton", path);
@@ -132,7 +132,7 @@ void draw() {
   torso.display();
   head.display();
   
-  if (iphonebutton > 0){
+  if (iphonebutton > 0 && iphonebutton < 5){
     println("iphonebutton: "+iphonebutton);
     emitters.fire(iphonebutton-1);
   }

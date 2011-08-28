@@ -91,10 +91,13 @@ class ParticleCollection {
   }
   // Method to add a force vector to a particular emitter only. 
   void fire(int emitter) {
+   if (emitter > 4){
+     return;
+   }
    ParticleSystem p = (ParticleSystem) emitters.get(emitter);
    p.fire();
    if (emitter == 0) {
-     myPort.write('Q');
+     myPort.write("yy");
    }
    if (emitter == 1) {
      myPort.write('W');
