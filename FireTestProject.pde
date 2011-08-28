@@ -42,6 +42,11 @@ float defaultWind = 0.021;
 float forcex = 0;
 float forcey = 0;
 
+int iphonebutton1;
+int iphonebutton2;
+int iphonebutton3;
+int iphonebutton4;
+
 //need to have a font
 PFont font;
 
@@ -106,13 +111,12 @@ void setup() {
   oscP5.plug(this,"torso", "/torso_pos_body");
   oscP5.plug(this,"head", "/head_pos_body");
   
-  for(int i = 1; i < 5; i++){
- 
-    String path = "/osc/button" + Integer.toString(i);
-    println(path);
-    iphone.plug(this,"iphoneButton", path);
-  }
-   
+
+  iphone.plug(this,"iphonebutton1", "/osc/button1");
+  iphone.plug(this,"iphonebutton2", "/osc/button2");
+  iphone.plug(this,"iphonebutton3", "/osc/button3");
+  iphone.plug(this,"iphonebutton4", "/osc/button4");
+      
   head = new joint(new PVector(0,0), "head");
   torso = new joint(new PVector(0,0), "torso");
   leftHand = new hand(new PVector(0,0), "left");
@@ -132,10 +136,20 @@ void draw() {
   torso.display();
   head.display();
   
-  if (iphonebutton > 0 && iphonebutton < 5){
-    println("iphonebutton: "+iphonebutton);
-    emitters.fire(iphonebutton-1);
+  if (iphonebutton1 > 0){
+    emitters.fire(0);
   }
+  if (iphonebutton2 > 0){
+    emitters.fire(1);
+
+  }
+  if (iphonebutton3 > 0){
+    emitters.fire(2);
+  }
+  if (iphonebutton4 > 0){
+    emitters.fire(3);
+  }
+  
   
   //println( "mouse x: " + mouseX + ", mouse y:" + mouseY); 
   // Calculate a "wind" force based on mouse horizontal position
