@@ -15,6 +15,7 @@ import oscP5.*;
 import netP5.*;
 
 OscP5 oscP5;
+OscP5 iphone;
 // synapse address
 NetAddress synapse;
 
@@ -48,6 +49,7 @@ void setup() {
   
   // osc listener
   oscP5 = new OscP5(this, 12345);
+  iphone = new OscP5(this, 10000);
   
   synapse = new NetAddress("127.0.0.1",12346);
   
@@ -56,7 +58,7 @@ void setup() {
   // Serial Setup
   String portName = Serial.list()[0];
   myPort = new Serial(this, portName, 9600);
-  println(Serial.list()); // list available serial ports
+  //println(Serial.list()); // list available serial ports
   
   // window setup. 
   size(640, 480);
@@ -84,7 +86,7 @@ void setup() {
   locations.add(new PVector( gridx * 3, gridy * 2 ));
   locations.add(new PVector( gridx * 5, gridy * 2 ));
   locations.add(new PVector( gridx* 6, gridy ));
-  println(gridx * 6); 
+  //println(gridx * 6); 
   // set up the fire directions
   directions = new ArrayList();
   directions.add(new PVector(-0.25, -0.75));
@@ -104,6 +106,13 @@ void setup() {
   oscP5.plug(this,"torso", "/torso_pos_body");
   oscP5.plug(this,"head", "/head_pos_body");
   
+  for(int i = 0; i < 5; i++){
+    println("Duck");
+    String path = "/osc/button" + Integer.toString(i);
+    println(path);
+    iphone.plug(this,"iphoneButton", path);
+  }
+   
   head = new joint(new PVector(0,0), "head");
   torso = new joint(new PVector(0,0), "torso");
   leftHand = new hand(new PVector(0,0), "left");
@@ -122,6 +131,12 @@ void draw() {
   leftHand.display();
   torso.display();
   head.display();
+  
+  if (iphonebutton > 0){
+    println("iphonebutton: "+iphonebutton);
+    emitters.fire(iphonebutton-1);
+  }
+  
   //println( "mouse x: " + mouseX + ", mouse y:" + mouseY); 
   // Calculate a "wind" force based on mouse horizontal position
   float dx = (mouseX - width/2) / 1000.0;
@@ -144,6 +159,12 @@ int maxLhy;
 int maxRhx;
 int maxRhy;
 
+int iphonebutton;
+
+public void iphoneButton(int value){
+  println(value);
+ iphonebutton = value;
+}
 
 public void torso(float x, float y, float z) {
   //println("### plug event method. received a message /lefthand_pos_body.");
@@ -170,7 +191,7 @@ public void righthand(float x, float y, float z) {
 }
 
 void oscEvent(OscMessage msg) {
-    
+    //msg.print();
     int curentTime = millis();
     
     if (curentTime > (lastSynapseRefresh + 2000)){
@@ -262,7 +283,7 @@ class hand extends joint {
       minY = position.y;
     }
     
-    if (side == "right"){
+    if (side == "right" && position.x != 0){
       if (position.x >= maxX-range && position.x <= maxX+range){
         emitters.fire(2);
       }
@@ -271,8 +292,8 @@ class hand extends joint {
       }  
     }
     
-    if (side == "left"){
-      println(minY);
+    if (side == "left" && position.x != 0){
+      //println(minY);
       if (position.x >= minX-range && position.x <= minX+range){
         emitters.fire(1);
       }
