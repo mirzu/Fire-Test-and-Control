@@ -63,7 +63,7 @@ void setup() {
   // Serial Setup
   String portName = Serial.list()[0];
   myPort = new Serial(this, portName, 9600);
-  //println(Serial.list()); // list available serial ports
+  println(Serial.list()); // list available serial ports
   
   // window setup. 
   size(640, 480);
@@ -106,24 +106,22 @@ void setup() {
   }
   smooth();
   
+  
+  // set up the osc plugin functions for both the kinect and iphone.
   oscP5.plug(this,"lefthand","/lefthand_pos_body");
   oscP5.plug(this,"righthand","/righthand_pos_body");
   oscP5.plug(this,"torso", "/torso_pos_body");
   oscP5.plug(this,"head", "/head_pos_body");
-  
-
   iphone.plug(this,"iphonebutton1", "/osc/button1");
   iphone.plug(this,"iphonebutton2", "/osc/button2");
   iphone.plug(this,"iphonebutton3", "/osc/button3");
   iphone.plug(this,"iphonebutton4", "/osc/button4");
-      
+  
+  // set up the body parts we are tracking.
   head = new joint(new PVector(0,0), "head");
   torso = new joint(new PVector(0,0), "torso");
   leftHand = new hand(new PVector(0,0), "left");
   rightHand = new hand(new PVector(0,0), "right");
-  
-   //font = loadFont("AndaleMono-14.v1w");
-   //textFont(font); 
 }
 
 void draw() {
@@ -137,70 +135,104 @@ void draw() {
   head.display();
   
   if (iphonebutton1 > 0){
-    emitters.fire(0);
+    emitters.startFiring(0);
   }
   if (iphonebutton2 > 0){
-    emitters.fire(1);
-
+    emitters.startFiring(1);
   }
   if (iphonebutton3 > 0){
-    emitters.fire(2);
+    emitters.startFiring(2);
   }
   if (iphonebutton4 > 0){
-    emitters.fire(3);
+    emitters.startFiring(3);
   }
-  
-  
-  //println( "mouse x: " + mouseX + ", mouse y:" + mouseY); 
-  // Calculate a "wind" force based on mouse horizontal position
-  float dx = (mouseX - width/2) / 1000.0;
-  float dy = (mouseY - height/2) / 1000.0;
-  PVector mouseLoc = new PVector(mouseX, mouseY);
   
   PVector wind = new PVector(forcex,forcey,0);
  
   emitters.add_force(wind);
   emitters.run();
-
+  
+  myPort.write(emitters.getMessage());
+  println(myPort.readString());
 }
 
-int lhx;
-int lhy;
-int rhx;
-int rhy;
-int maxLhx;
-int maxLhy;
-int maxRhx;
-int maxRhy;
+void keyPressed() {
+  if (key == '1'){
+    emitters.startFiring(0);
+  }
+  if (key == '2'){
+    emitters.startFiring(1);
+  }
+  if (key == '3'){
+    emitters.startFiring(2);
+  }
+  if (key == '4'){
+    emitters.startFiring(3);
+  }
+}
+void keyReleased() {
+  if (key == '1'){
+    emitters.stopFiring(0);
+  }
+  if (key == '2'){
+    emitters.stopFiring(1);
+  }
+  if (key == '3'){
+    emitters.stopFiring(2);
+  }
+  if (key == '4'){
+    emitters.stopFiring(3);
+  }
+}
 
-int iphonebutton;
 
-public void iphoneButton(int value){
-  println(value);
- iphonebutton = value;
+public void iphonebutton1(int value){
+  if (value == 1) {
+    iphonebutton1 = 1;
+  }
+  if (value == 0) {
+    iphonebutton1 = 0;
+  }
+    
+}
+public void iphonebutton2(int value){
+  if (value == 1) {
+    iphonebutton2 = 1;
+  } 
+  if (value == 0) {
+    iphonebutton2 = 0;
+  }
+}
+public void iphonebutton3(int value){
+  if (value == 1) {
+    iphonebutton3 = 1;
+  }
+  if (value == 0) {
+    iphonebutton3 = 0;
+  } 
+}
+public void iphonebutton4(int value){
+  if (value == 1) {
+    iphonebutton4 = 1;
+  }
+  if (value == 0) {
+    iphonebutton4 = 0;
+  }
 }
 
 public void torso(float x, float y, float z) {
-  //println("### plug event method. received a message /lefthand_pos_body.");
-  //println("x:" + x + " y:" + y + " z:" + z);
   torso.move(new PVector(x, -y)); 
 }
 
 public void head(float x, float y, float z) {
-  //println("### plug event method. received a message /lefthand_pos_body.");
-  //println("x:" + x + " y:" + y + " z:" + z);
   head.move(new PVector(x, -y)); 
 }
 
 public void lefthand(float x, float y, float z) {
-  //println("### plug event method. received a message /lefthand_pos_body.");
-  //println("x:" + lhx + " y:" + lhy + " z:" + lhz);
   leftHand.move(new PVector(x, -y)); 
 }
 
 public void righthand(float x, float y, float z) {
-  //println("### plug event method. received a message /righthand_pos_body.");
-  //println("x:" + x + " y:" + y + " z:" + z);
   rightHand.move(new PVector(x, -y)); 
 }
 
@@ -276,6 +308,8 @@ class hand extends joint {
   float minX = 1;
   float minY = 1;
   PVector distance = new PVector(0,0,0);
+  boolean[] hitWasdetected = new boolean[4];
+  boolean[] hit = new boolean[4];
 
   hand (PVector setPosition, String setSide) {
    super(setPosition, setSide);
@@ -299,22 +333,45 @@ class hand extends joint {
     
     if (side == "right" && position.x != 0){
       if (position.x >= maxX-range && position.x <= maxX+range){
-        emitters.fire(2);
+        hit[2] = true;
+        hitWasdetected[2] = true;
+      } else {
+       hit[2] = false;
       }
+      
       if (position.y >= minY-range && position.y <= minY+range){
-        emitters.fire(3);
-      }  
+        hit[3] = true; 
+        hitWasdetected[3] = true;
+      } else {
+        hit[3] = false;
+      } 
     }
     
     if (side == "left" && position.x != 0){
       //println(minY);
       if (position.x >= minX-range && position.x <= minX+range){
-        emitters.fire(1);
+        hit[1] = true;
+        hitWasdetected[1] = true;
+      } else {
+        hit[1] = false;
       }
+      
       if (position.y >= minY-range && position.y <= minY+range){
-        emitters.fire(0);
-      } 
+        hit[0] = true;
+        hitWasdetected[0] = true;
+      } else {
+        hit[0] = false;
+      }
   
+    }
+    
+    for (int i = 0; i<4; i++) {
+      if (hit[i] == true) {
+        emitters.startFiring(i);
+      } else if (hit[i] == false && hitWasdetected[i] == true) {
+        emitters.stopFiring(i);
+        hitWasdetected[i] = false;
+      }
     }
    
     super.display();
