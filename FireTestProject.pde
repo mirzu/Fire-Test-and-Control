@@ -153,7 +153,6 @@ void draw() {
   emitters.run();
   
   myPort.write(emitters.getMessage());
-  println(myPort.readString());
 }
 
 void keyPressed() {
