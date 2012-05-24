@@ -116,7 +116,7 @@ class ParticleCollection {
   
   String getMessage() {    
     String message = "0 0 0 0";
-    message = messageArray[0] + " " + messageArray[1] + " " + messageArray[2] + " " + messageArray[3] + '\r';
+    message = "4," + messageArray[0] + "," + messageArray[1] + "," + messageArray[2] + "," + messageArray[3] + ";\r";
     return message;
   }  
 

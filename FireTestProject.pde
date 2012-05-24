@@ -62,7 +62,7 @@ void setup() {
   
   // Serial Setup
   String portName = Serial.list()[0];
-  myPort = new Serial(this, portName, 9600);
+  myPort = new Serial(this, portName, 115200);
   println(Serial.list()); // list available serial ports
   
   // window setup. 
@@ -153,6 +153,7 @@ void draw() {
   emitters.run();
   
   myPort.write(emitters.getMessage());
+  println(emitters.getMessage());
 }
 
 void keyPressed() {
